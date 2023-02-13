@@ -25,6 +25,7 @@ class SubscriptionService
                     $s->status = $service->subscription;
                     $s->save();
                 }
+                return json_encode(["message"=>"ok",'status'=>200]);
                 DB::commit();
             } catch (\Exception $exception) {
                 DB::rollBack();
@@ -37,6 +38,7 @@ class SubscriptionService
                     $s->reapet_time = date("Y-m-d H:i:s", strtotime(now())+7200);
                     $s->save();
                 }
+                return json_encode(["message"=>$exception->getMessage(),'status'=>500]);
             }
 
         }
