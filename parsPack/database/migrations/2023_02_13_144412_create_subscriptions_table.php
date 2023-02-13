@@ -8,14 +8,14 @@ class CreateSubscriptionsTable extends Migration {
 	public function up()
 	{
 		Schema::create('subscriptions', function(Blueprint $table) {
-			$table->increments('id')->primary();
+            $table->id();
 			$table->enum('status', array('pending', 'active', 'expired'))->default("pending");
-			$table->integer('app_id')->unsigned();
-			$table->integer('user_id')->unsigned()->index();
+			$table->unsignedBigInteger('app_id');
+			$table->unsignedBigInteger('user_id')->index();
 			$table->timestamps();
 			$table->softDeletes();
 			$table->string('token', 300);
-			$table->timestamp('repeat_time');
+			$table->timestamp('repeat_time')->nullable();
 		});
 	}
 

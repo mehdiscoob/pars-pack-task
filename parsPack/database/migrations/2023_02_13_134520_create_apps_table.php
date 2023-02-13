@@ -8,9 +8,9 @@ class CreateAppsTable extends Migration {
 	public function up()
 	{
 		Schema::create('apps', function(Blueprint $table) {
-			$table->increments('id')->primary();
+			$table->id();
 			$table->string('name', 200)->default('null');
-			$table->integer('platform_id')->unsigned()->index();
+			$table->unsignedBigInteger('platform_id')->index();
 			$table->timestamps();
 			$table->softDeletes();
 		});
