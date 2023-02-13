@@ -15,7 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+         $schedule->command('command:check-status-apple-subscription')->everyMinute();
+         $schedule->command('command:check-status-google-subscription')->everyMinute();
+
     }
 
     /**

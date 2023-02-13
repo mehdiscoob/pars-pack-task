@@ -16,12 +16,10 @@ class SubscriptionService
             try {
                 if ($s->app->platform_id == 1) {
                     $service = "new Service";
-                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()));
                     $s->status = $service->status;
                     $s->save();
                 }elseif ($s->app->platform_id == 2) {
                     $service = "new Service";
-                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()));
                     $s->status = $service->subscription;
                     $s->save();
                 }
