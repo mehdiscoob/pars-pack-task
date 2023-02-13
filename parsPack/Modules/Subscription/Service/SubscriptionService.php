@@ -25,6 +25,7 @@ class SubscriptionService
                     $s->status = $service->subscription;
                     $s->save();
                 }
+                DB::commit();
             } catch (\Exception $exception) {
                 DB::rollBack();
                 if ($s->app->platform_id == 1) {
