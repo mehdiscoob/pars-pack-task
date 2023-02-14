@@ -14,6 +14,20 @@ class CreatePlatformsTable extends Migration {
 			$table->timestamps();
 			$table->softDeletes();
 		});
+        // Insert some stuff
+        DB::table('platforms')->insert(
+            array(
+                'name' => 'Google',
+                'duration' => 3600
+            )
+        );
+        DB::table('platforms')->insert(
+            array(
+                'name' => 'Apple',
+                'duration' => 7200
+            )
+        );
+
 	}
 
 	public function down()
