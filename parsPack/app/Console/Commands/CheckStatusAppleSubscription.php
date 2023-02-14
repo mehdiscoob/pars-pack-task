@@ -21,7 +21,7 @@ class CheckStatusAppleSubscription extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Check Apple Subscription';
 
     /**
      * Create a new command instance.
@@ -43,6 +43,7 @@ class CheckStatusAppleSubscription extends Command
         $subscriptions = Subscription::query()->where('subscriptions.status', "pending")
             ->join('apps', 'subscriptions.app_id', '=', 'apps.id')
             ->whereNotNull("subscriptions.repeat_time")
+            ->whereDate('repeat_time','<',now()->format('Y-m-d H:i:s'))
             ->where('apps.platform_id', '2')->get();
         foreach ($subscriptions as $s) {
             DB::beginTransaction();
