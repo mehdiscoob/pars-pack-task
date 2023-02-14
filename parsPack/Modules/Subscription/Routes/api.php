@@ -13,6 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/subscription', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:api')->prefix('subscription')->group(function () {
+    Route::post('/chengestatussubscriptionbyuserid/{id}', [\Modules\Subscription\Http\Controllers\SubscriptionController::class, 'changeStatusSubscriptionByUserId']);
+});
+Route::middleware('api')->prefix('subscription')->group(function () {
+Route::post('/getlastexpiredsubscriprions', [\Modules\Subscription\Http\Controllers\SubscriptionController::class, 'getLastExpiredSubscriprions']);
 });

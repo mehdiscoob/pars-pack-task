@@ -21,14 +21,22 @@ class SubscriptionController extends Controller
 
 
     /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
+     * Checking Subscriptions`s status By User ID
+     * @param $id
+     * @return SubscriptionService
      */
-    public function changeStatusSubscription($id)
+    public function changeStatusSubscriptionByUserId($id)
     {
         return $this->subscriptionService->changeStatusSubscription($id);
     }
 
+    /**
+     * Getting Expired Last Report That checked Subscriptions
+     * @return SubscriptionService
+     */
+    public function getLastExpiredSubscriprions()
+    {
+        return $this->subscriptionService->getLastExpiredSubscription();
+    }
 
 }

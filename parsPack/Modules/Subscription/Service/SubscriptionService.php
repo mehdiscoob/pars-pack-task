@@ -2,6 +2,7 @@
 
 namespace Modules\Subscription\Service;
 
+use App\Models\ExpiredLog;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -14,37 +15,29 @@ class SubscriptionService
     {
         $user = User::query()->find($id);
         $subscriptions = $user->subscriptions()->where('status','active')->orWhere('status',"pending")->get();
+        $expiredCount=0;
         foreach ($subscriptions as $s) {
             DB::beginTransaction();
             try {
                 $preStatus = $s->status;
-                if ($s->app->platform_id == 1) {
-                    $service = new GoogleSubscriptionService();
-                    $check = $service->checkSubscriptionStatus($s->token);
-                    $s->status = $check->status;
-                    $s->save();
-                } elseif ($s->app->platform_id == 2) {
-                    $service = new AppleSubscriptionService();
-                    $check = $service->checkSubscriptionStatus($s->token);
-                    $s->status = $check->subscription;
-                    $s->save();
+                $service = SubscriptionFactory::create($s->app->platform_id);
+                $check = $service->checkSubscriptionStatus($s->token);
+                $s->status =$check->status!=null??$check->subscription;
+                $s->save();
+                if ($check->status=="expired"){
+                    $expiredCount=$expiredCount+1;
                 }
-                if ($preStatus = "active" && $s->status == "expired") {
+                $expired= ExpiredLog::create(['counter'=>$expiredCount]);
+                if ($preStatus = "active" && $service['status'] == "expired") {
                 Mail::to('admin@gmail.com')->send(new ExpiredEmail($s->id));
                 }
                 return json_encode(["message" => "ok", 'status' => 200]);
                 DB::commit();
             } catch (\Exception $exception) {
                 DB::rollBack();
-                if ($s->app->platform_id == 1) {
                     $s->status = "pending";
-                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + 3600);
+                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + $s->app->platform->duration);
                     $s->save();
-                } elseif ($s->app->platform_id == 2) {
-                    $s->status = "pending";
-                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + 7200);
-                    $s->save();
-                }
                 return json_encode(["message" => $exception->getMessage(), 'status' => 500]);
             }
 
@@ -54,34 +47,73 @@ class SubscriptionService
     public function checkStatusSubscriptions()
     {
         $subscriptions = Subscription::query()->where('status','active')->orWhere('status',"pending")->get();
+        $expiredCount=0;
         foreach ($subscriptions as $s) {
             DB::beginTransaction();
             try {
                 $preStatus = $s->status;
                 $service = SubscriptionFactory::create($s->app->platform_id);
                 $check = $service->checkSubscriptionStatus($s->token);
-                $s->status = $check->subscription;
+                $s->status =$check->status;
                 $s->save();
-
-                if ($preStatus == "active" && $s->status == "expired") {
+                if ($check->status=="expired"){
+                    $expiredCount=$expiredCount+1;
+                }
+                $expired= ExpiredLog::create(['counter'=>$expiredCount]);
+                if ($preStatus == "active" && $service['status'] == "expired") {
                     Mail::to('admin@gmail.com')->send(new ExpiredEmail($s->id));
                 }
                 return json_encode(["message" => "ok", 'status' => 200]);
                 DB::commit();
             } catch (\Exception $exception) {
                 DB::rollBack();
-                if ($s->app->platform_id == 1) {
-                    $s->status = "pending";
-                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + 3600);
-                    $s->save();
-                } elseif ($s->app->platform_id == 2) {
-                    $s->status = "pending";
-                    $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + 7200);
-                    $s->save();
-                }
+                $s->status = "pending";
+                $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + $s->app->platform->duration);
+                $s->save();
                 return json_encode(["message" => $exception->getMessage(), 'status' => 500]);
             }
 
         }
+    }
+
+    public function checkFaileStatusSubscriptions()
+    {
+        $subscriptions=Subscription::query()->where('subscriptions.status',"pending")
+            ->whereNotNull("subscriptions.repeat_time")
+            ->whereDate('repeat_time','<',now()->format('Y-m-d H:i:s'))
+             ->get();
+        $expiredCount=0;
+        foreach ($subscriptions as $s) {
+            DB::beginTransaction();
+            try {
+                $preStatus = $s->status;
+                $service = SubscriptionFactory::create($s->app->platform_id);
+                $check = $service->checkSubscriptionStatus($s->token);
+                $s->status =$check->status;
+                $s->save();
+                if ($check->status=="expired"){
+                    $expiredCount=$expiredCount+1;
+                }
+                $expired= ExpiredLog::create(['counter'=>$expiredCount]);
+                if ($preStatus == "active" && $check->status == "expired") {
+                    Mail::to('admin@gmail.com')->send(new ExpiredEmail($s->id));
+                }
+                return json_encode(["message" => "ok", 'status' => 200]);
+                DB::commit();
+            } catch (\Exception $exception) {
+                DB::rollBack();
+                $s->status = "pending";
+                $s->reapet_time = date("Y-m-d H:i:s", strtotime(now()) + $s->app->platform->duration);
+                $s->save();
+                return json_encode(["message" => $exception->getMessage(), 'status' => 500]);
+            }
+
+        }
+    }
+
+    public function getLastExpiredSubscription()
+    {
+        $expired=ExpiredLog::query()->orderBy('id')->first();
+        return isset($expired)?$expired->counter:"notFound";
     }
 }
