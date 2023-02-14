@@ -54,7 +54,7 @@ class SubscriptionService
                 $preStatus = $s->status;
                 $service = SubscriptionFactory::create($s->app->platform_id);
                 $check = $service->checkSubscriptionStatus($s->token);
-                $s->status =$check->status;
+                $s->status =$check->status!=null??$check->subscription;
                 $s->save();
                 if ($check->status=="expired"){
                     $expiredCount=$expiredCount+1;
@@ -76,7 +76,7 @@ class SubscriptionService
         }
     }
 
-    public function checkFaileStatusSubscriptions()
+    public function checkFailedStatusSubscriptions()
     {
         $subscriptions=Subscription::query()->where('subscriptions.status',"pending")
             ->whereNotNull("subscriptions.repeat_time")
@@ -89,7 +89,7 @@ class SubscriptionService
                 $preStatus = $s->status;
                 $service = SubscriptionFactory::create($s->app->platform_id);
                 $check = $service->checkSubscriptionStatus($s->token);
-                $s->status =$check->status;
+                $s->status =$check->status!=null??$check->subscription;
                 $s->save();
                 if ($check->status=="expired"){
                     $expiredCount=$expiredCount+1;

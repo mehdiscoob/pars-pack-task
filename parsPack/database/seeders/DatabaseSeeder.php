@@ -1,9 +1,16 @@
 <?php
 
-class DatabaseSeeder extends Seeder {
+namespace Database\Seeders;
 
-	public function run()
-	{
-		Eloquent::unguard();
-	}
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+
+    public function run()
+    {
+        $this->call([
+
+        ]);
+    }
 }

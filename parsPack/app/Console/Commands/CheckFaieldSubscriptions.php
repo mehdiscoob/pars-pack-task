@@ -6,7 +6,7 @@ use App\Models\Subscription;
 use Illuminate\Console\Command;
 use Modules\Subscription\Service\SubscriptionService;
 
-class CheckFaieldSubscriptions extends Command
+class CheckFailedSubscriptions extends Command
 {
     /**
      * The name and signature of the console command.
@@ -40,7 +40,7 @@ class CheckFaieldSubscriptions extends Command
     public function handle()
     {
         $service=new SubscriptionService();
-        $check=$service->checkFaileStatusSubscriptions();
+        $check=$service->checkFailedStatusSubscriptions();
         return $check;
     }
 }

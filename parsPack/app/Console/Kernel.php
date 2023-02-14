@@ -3,7 +3,7 @@
 namespace App\Console;
 
 
-use App\Console\Commands\CheckFaieldSubscriptions;
+use App\Console\Commands\CheckFailedSubscriptions;
 use App\Console\Commands\CheckSubscriptions;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -18,7 +18,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command(CheckFaieldSubscriptions::class)->everyMinute();
+         $schedule->command(CheckFailedSubscriptions::class)->everyMinute();
          $schedule->command(CheckSubscriptions::class)->weekly();
 
     }
