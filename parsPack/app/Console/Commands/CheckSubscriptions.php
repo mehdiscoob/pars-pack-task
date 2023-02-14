@@ -1,18 +1,51 @@
 <?php
 
-namespace Modules\Subscription\Service;
+namespace App\Console\Commands;
 
+use App\Models\Subscription;
 use App\Models\User;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Modules\Subscription\Emails\ExpiredEmail;
+use Modules\Subscription\Service\AppleSubscriptionService;
+use Modules\Subscription\Service\GoogleSubscriptionService;
 
-class SubscriptionService
+class CheckSubscriptions extends Command
 {
-    public function changeStatusSubscription($id)
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'command:name';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
     {
-        $user = User::query()->find($id);
-        $subscriptions = $user->subscriptions()->where('status','active')->orWhere('status',"pending")->get();
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
+    {
+
+        $subscriptions = Subscription::query()->where('status','active')->orWhere('status',"pending")->get();
         foreach ($subscriptions as $s) {
             DB::beginTransaction();
             try {
@@ -29,7 +62,7 @@ class SubscriptionService
                     $s->save();
                 }
                 if ($preStatus = "active" && $s->status == "expired") {
-                Mail::to('admin@gmail.com')->send(new ExpiredEmail($s->id));
+                    Mail::to('admin@gmail.com')->send(new ExpiredEmail($s->id));
                 }
                 return json_encode(["message" => "ok", 'status' => 200]);
                 DB::commit();

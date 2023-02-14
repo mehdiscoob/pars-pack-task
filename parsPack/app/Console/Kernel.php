@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\CheckStatusAppleSubscription;
 use App\Console\Commands\CheckStatusGoogleSubscription;
+use App\Console\Commands\CheckSubscriptions;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -19,6 +20,7 @@ class Kernel extends ConsoleKernel
     {
          $schedule->command(CheckStatusAppleSubscription::class)->everyMinute();
          $schedule->command(CheckStatusGoogleSubscription::class)->everyMinute();
+         $schedule->command(CheckSubscriptions::class)->weekly();
 
     }
 
