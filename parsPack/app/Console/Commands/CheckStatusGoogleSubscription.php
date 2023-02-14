@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Subscription;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Modules\Subscription\Service\GoogleSubscriptionService;
 
 class CheckStatusGoogleSubscription extends Command
 {
@@ -46,8 +47,9 @@ class CheckStatusGoogleSubscription extends Command
         foreach ($subscriptions as $s){
             DB::beginTransaction();
             try {
-                $service = "new Service";
-                $s->status = $service->subscription;
+                $service = new GoogleSubscriptionService();
+                $check=$service->checkSubscriptionStatus($s->token);
+                $s->status = $check->status;
                 $s->save();
                 return json_encode(["message"=>"ok",'status'=>200]);
                 DB::commit();

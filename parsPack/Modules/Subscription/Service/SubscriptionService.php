@@ -15,12 +15,14 @@ class SubscriptionService
             DB::beginTransaction();
             try {
                 if ($s->app->platform_id == 1) {
-                    $service = "new Service";
-                    $s->status = $service->status;
+                    $service = new GoogleSubscriptionService();
+                    $check=$service->checkSubscriptionStatus($s->token);
+                    $s->status = $check->status;
                     $s->save();
                 }elseif ($s->app->platform_id == 2) {
-                    $service = "new Service";
-                    $s->status = $service->subscription;
+                    $service = new AppleSubscriptionService();
+                    $check=$service->checkSubscriptionStatus($s->token);
+                    $s->status = $check->subscription;
                     $s->save();
                 }
                 return json_encode(["message"=>"ok",'status'=>200]);
